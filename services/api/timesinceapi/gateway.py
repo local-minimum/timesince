@@ -1,9 +1,11 @@
+import datetime as dt
 from uuid import uuid4
-from typing import Optional
+from typing import Optional, Iterable
 
-from flask_pymongo import PyMongo
+import attr
+from flask_pymongo import PyMongo, ObjectId
 
-from .inputalidators import RequestUser
+from .inputvalidators import RequestUser
 from .timeutil import Since
 
 
@@ -42,15 +44,15 @@ class User:
 
 @attr.s(frozen=True)
 class Timer:
+    timerid = attr.ib(metadata={'record_name': '_id'})
     title = attr.ib(metadata={'record_name': 'title'})
-    events = attr.ib(default=[], metadata={'record_name': 'events'})
     most_recent = attr.ib(metadata={
         'generated': lambda record: Since(record.get('events', [None])[-1]),
     })
+    events = attr.ib(default=[], metadata={'record_name': 'events'})
     publishedid = attr.ib(
         default=None, metadata={'record_name': 'publishedid'},
     )
-    timerid = attr.ib(metadata={'record_name': '_id'})
 
     @classmethod
     def from_record(cls, record) -> "Timer":
@@ -140,7 +142,7 @@ class Gateway:
         )
         return Since(about['time'])
 
-    def get_user_timers(self, user: User) -> Iterable[Timers]:
+    def get_user_timers(self, user: User) -> Iterable[Timer]:
         timers = self._mongo.db.timers
         userid = self.get_userid(user)
         for timerrecord in timers.find({'userid': userid}):
@@ -155,7 +157,7 @@ class Gateway:
             return Timer.from_record(record)
         return None
 
-    def get_listed_public_timers(self) -> Iterable[Timers]:
+    def get_listed_public_timers(self) -> Iterable[Timer]:
         timers = self._mongo.db.timers
         for record in timers.find({'publishedid': {'$gt': ''}, 'listed': True}):
             yield Timer.from_record(record)
@@ -165,7 +167,7 @@ class Gateway:
         userid = self.get_userid(user)
         record = {
             'title': title,
-            'userid': userid
+            'userid': userid,
             'events': [dt.datetime.utcnow()] if ithappendnow else [],
             'publishedid': None,
             'listed': False,
@@ -181,5 +183,5 @@ class Gateway:
             {'_id': oid, 'userid': userid},
             {'$push': {'events': dt.datetime.utcnow()}},
         )
-        record = timers.find_one({'_id': oid)})
+        record = timers.find_one({'_id': oid})
         return Timer.from_record(record)

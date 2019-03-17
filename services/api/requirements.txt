@@ -6,6 +6,7 @@
 #
 attrs==19.1.0
 click==7.0                # via flask
+flask-login==0.4.1
 flask-pymongo==2.2.0
 flask==1.0.2
 itsdangerous==1.1.0       # via flask

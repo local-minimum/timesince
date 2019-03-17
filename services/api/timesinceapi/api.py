@@ -1,4 +1,3 @@
-import datetime as dt
 from http import HTTPStatus
 
 from flask import Flask, jsonify, request
@@ -7,8 +6,8 @@ from flask_login import (
 )
 
 from .timeutil import Since
-from .inputalidators import RequestUser
-from .gateway import validate_user
+from .inputvalidators import RequestUser
+from .gateway import Gateway
 
 
 def register_api(app: Flask, gateway: Gateway) -> None:
@@ -22,16 +21,15 @@ def register_api(app: Flask, gateway: Gateway) -> None:
 
     @app.route('/', methods=['GET'])
     def apiroot():
-        pseudometric = 'came to visit'
         since = gateway.root_visits()
         if not since:
             return jsonify({
-                'message': 'Noone ever {} before'.format(pseudometric),
+                'title': 'Someone came to visit',
                 'value': None,
                 'unit': None,
             }), HTTPStatus.OK
         return jsonify(dict({
-            'message': '{} since someone {}'.format(since, pseudometric),
+            'title': 'Someone came to visit',
         }, **since.todict())), HTTPStatus.OK
 
     @app.route('/login', methods=['POST'])
@@ -97,7 +95,9 @@ def register_api(app: Flask, gateway: Gateway) -> None:
             return jsonify({'message': 'Missing title'}), HTTPStatus.BADREQUEST
         return jsonify(
             gateway.create_timer(
-                current_user, json['title'], bool(json.get('ithappendnow'])),
+                current_user,
+                json['title'],
+                bool(json.get('ithappendnow', False)),
             ),
         ), HTTPStatus.OK
 
