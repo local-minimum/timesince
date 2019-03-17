@@ -3,7 +3,11 @@ from typing import Dict, Any
 
 
 class Since:
-    def __init__(self, when: dt.datetime) -> None:
+    def __init__(self, when: Optional[dt.datetime]) -> None:
+        if when is None:
+            self._value = None
+            self._unit = 'never'
+            return
         seconds = (dt.datetime.utcnow() - when).total_seconds()
         if seconds > 60:
             minutes = seconds / 60.
@@ -27,7 +31,7 @@ class Since:
             self._unit = 'seconds' if self._value != 1 else 'second'
 
     @property
-    def value(self) -> int:
+    def value(self) -> Optional[int]:
         return self._value
 
     @property

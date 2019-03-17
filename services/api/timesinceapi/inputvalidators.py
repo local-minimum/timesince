@@ -18,7 +18,7 @@ def validemail(email) -> bool:
 
 
 @attr.s(frozen=True)
-class User:
+class RequestUser:
     name = attr.ib(
         metadata={
             'json_name': 'user',
@@ -39,11 +39,11 @@ class User:
     )
 
     @classmethod
-    def from_request_data(cls, requestdata) -> "User":
+    def from_request_data(cls, requestdata) -> "RequestUser":
         if requestdata is None:
             raise ValidationError()
         params = {}
-        for attribute in attr.fields(User):
+        for attribute in attr.fields(RequestUser):
             json_name = attribute.metadata.get('json_name')
             validator = attribute.metadata.get('validator')
             if json_name and json_name in requestdata:
