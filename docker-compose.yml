@@ -1,0 +1,14 @@
+---
+version: '3.3'
+
+services:
+  ui:
+    build: services/ui
+    restart: "unless-stopped"
+    ports: ["5000"]
+    volumes:
+      - './services/ui/public:/usr/local/apache2/htdocs/'
+  api:
+    build: services/api
+    restart: "unless-stopped"
+    ports: ["5001:5000"]
