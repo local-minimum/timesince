@@ -1,5 +1,5 @@
 FROM httpd
 
 COPY httpd.conf /usr/local/apache2/conf/
-COPY public/ /usr/local/apache2/htdocs/
+COPY build/ /usr/local/apache2/htdocs/
 EXPOSE 5000

@@ -14,7 +14,7 @@ services:
     build: services/ui
     restart: "unless-stopped"
     volumes:
-      - './services/ui/public:/usr/local/apache2/htdocs/'
+      - './services/ui/build:/usr/local/apache2/htdocs/'
   api:
     build: services/api
     restart: "unless-stopped"
