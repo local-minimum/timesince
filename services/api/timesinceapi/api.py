@@ -32,6 +32,10 @@ def register_api(app: Flask, gateway: Gateway) -> None:
             'title': 'Someone came to visit',
         }, **since.todict())), HTTPStatus.OK
 
+    @app.route('/ping', methods=['GET'])
+    def ping():
+        return jsonify({'message': 'pong'}), HTTPStatus.OK
+
     @app.route('/login', methods=['POST'])
     def login():
         user_request = UserRequest.from_request_data(request.get_json())

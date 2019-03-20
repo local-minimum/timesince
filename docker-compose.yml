@@ -2,13 +2,29 @@
 version: '3.3'
 
 services:
+  gateway:
+    build: services/gateway
+    ports:
+      - "127.0.0.1:5011:80"
+    links:
+      - ui
+      - api
+    restart: "unless-stopped"
   ui:
     build: services/ui
     restart: "unless-stopped"
-    ports: ["5000"]
     volumes:
       - './services/ui/public:/usr/local/apache2/htdocs/'
   api:
     build: services/api
     restart: "unless-stopped"
-    ports: ["5001:5000"]
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:3.4
+    volumes:
+      - mongo-data:/data/db
+    restart: "unless-stopped"
+
+volumes:
+  mongo-data:
