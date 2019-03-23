@@ -13,7 +13,7 @@ export function retrieveUserState() {
       error => {
         dispatch(clearUser());
         api.getVisitationTimer().then(
-          timer => dispatch(setFeed([timer])),
+          response => dispatch(setFeed(response.feed)),
           error => dispatch(setError('Could not reach server.')),
         );
       },

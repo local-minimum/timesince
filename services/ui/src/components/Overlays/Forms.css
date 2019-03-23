@@ -32,9 +32,3 @@
 .Form > .action-buttons > *{
   float: right;
 }
-
-.Form .-error {
-  color: #9932CC;
-  font-weight: bold;
-  font-size: 70%;
-}

@@ -1,0 +1,9 @@
+.Feed {
+  margin: 1em 1em 2em;
+  display: flex;
+  flex-wrap: wrap;
+  flex-flow: row;
+  align-items: flex-start;
+  align-content: center;
+  justify-content: center;
+}

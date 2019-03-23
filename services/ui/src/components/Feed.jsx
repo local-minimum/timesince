@@ -1,14 +1,21 @@
 import React, { Component } from 'react';
+import './Feed.css'
+import Timer from './Cards/Timer';
 
 export default class Feed extends Component {
   render() {
     const { feed } = this.props;
-    const item = feed[0];
-    if (!item) return <div>Nothing to show</div>;
+    let Feed;
+    if (!feed || feed.length == 0) {
+      Feed = <div>Nothing to show</div>;
+    } else {
+      Feed = feed.map(
+        item => <Timer key={item.title} {...item} />
+      );
+    }
     return (
-      <div>
-        <h1>{item.title}</h1>
-        <div>{item.value} {item.unit} ago.</div>
+      <div className="Feed">
+        {Feed}
       </div>
     );
   }

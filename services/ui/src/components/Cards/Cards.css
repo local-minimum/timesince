@@ -1,0 +1,12 @@
+.Card {
+  border-radius: 1em;
+  margin-top: 8em;
+  padding: 2em;
+  background: #fff;
+  flex-basis: 20%;
+  margin: 0.5em;
+}
+
+.Card > H1 {
+  font-size: 120%;
+}

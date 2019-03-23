@@ -1,10 +1,9 @@
 from http import HTTPStatus
 from typing import Optional
-import logging
 
 from flask import Flask, jsonify, request
 from flask_login import (
-    LoginManager, logout_user, login_user, current_user, login_required,
+    LoginManager, logout_user, login_user, current_user,
 )
 
 from .timeutil import Since
@@ -20,27 +19,35 @@ def register_api(app: Flask, gateway: Gateway) -> None:
     @login_manager.user_loader
     def load_user(access_token: str) -> Optional[User]:
         user = gateway.get_user_session(access_token)
+        app.logger.info(user)
         if user:
-            logging.info("Found user session {} token {}".format(
+            app.logger.info("Found user session {} token {}".format(
                 user.name,
                 user.get_id(),
             ))
         else:
-            logging.info("No user found for token {}".format(access_token))
+            app.logger.info("No user found for token {}".format(access_token))
         return user
+
+    def login_required(f):
+        def wrapper(*args, **kwargs):
+            if not current_user.is_authenticated:
+                return jsonify({'message': 'Access Denied'}), HTTPStatus.FORBIDDEN
+            else:
+                return f(*args, **kwargs)
+        wrapper.__name__ = f.__name__
+        return wrapper
 
     @app.route('/', methods=['GET'])
     def apiroot():
-        since = gateway.root_visits()
-        if not since:
-            return jsonify({
-                'title': 'Someone came to visit',
-                'value': None,
-                'unit': None,
-            }), HTTPStatus.OK
-        return jsonify(dict({
-            'title': 'Someone came to visit',
-        }, **since.todict())), HTTPStatus.OK
+        since_visit = gateway.root_visits()
+        since_register = gateway.registration_timer()
+        return jsonify({
+            'feed': [
+                since_visit.todict(),
+                since_register.todict(),
+            ],
+        }), HTTPStatus.OK
 
     @app.route('/ping', methods=['GET'])
     def ping():
@@ -53,7 +60,7 @@ def register_api(app: Flask, gateway: Gateway) -> None:
         )
         user = gateway.validate_user(user_request)
         if user:
-            logging.info("Logging in {} with token {}".format(
+            app.logger.info("Logging in {} with token {}".format(
                 user.name,
                 user.get_id(),
             ))
@@ -82,7 +89,7 @@ def register_api(app: Flask, gateway: Gateway) -> None:
         try:
             userrequest = RequestUser.from_request_data(request.get_json())
         except ValidationError:
-            logging.info("Failed to validate user on request {}".format(
+            app.logger.info("Failed to validate user on request {}".format(
                 request.get_json(),
             ))
             return (
@@ -107,6 +114,7 @@ def register_api(app: Flask, gateway: Gateway) -> None:
     @app.route('/user', methods=['Get'])
     @login_required
     def get_current_user(self):
+        app.logger.info("Getting current user");
         return jsonify({'name': current_user.name}), HTTPStatus.OK
 
     @app.route('/timers', methods=['GET'])

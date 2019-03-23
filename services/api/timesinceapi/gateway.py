@@ -1,22 +1,28 @@
 import datetime as dt
 from uuid import uuid4
-from typing import Optional, Iterable
+from typing import Optional, Iterable, List
 
 import attr
 import bcrypt
 from flask_pymongo import PyMongo, ObjectId
+from flask_login import UserMixin
 
 from .inputvalidators import RequestUser
 from .timeutil import Since
 
 
-class User:
+class User(UserMixin):
     def __init__(self, name, access_token=None):
+        super().__init__()
         self._access_token = (
             access_token if access_token is not None
             else str(uuid4().int + hash(name))
         )
         self._name = name
+
+    @property
+    def self(self):
+        return self
 
     @property
     def name(self):
@@ -39,7 +45,9 @@ class User:
         return self._access_token
 
     def __str__(self):
-        return '<User {} (id {})>'.format(self._name, self._id)
+        return '<User {} (access token {})>'.format(
+            self._name, self._access_token,
+        )
 
 
 @attr.s(frozen=True)
@@ -47,7 +55,7 @@ class Timer:
     timerid = attr.ib(metadata={'record_name': '_id'})
     title = attr.ib(metadata={'record_name': 'title'})
     most_recent = attr.ib(metadata={
-        'generated': lambda record: Since(record.get('events', [None])[-1]),
+        'generated': lambda record: Since(record.get('events', [None])),
     })
     events = attr.ib(default=[], metadata={'record_name': 'events'})
     publishedid = attr.ib(
@@ -133,19 +141,30 @@ class Gateway:
         record = users.find_one({'accessToken': user.get_id()})
         return record['_id']
 
-    def root_visits(self) -> Optional[Since]:
+    def root_visits(self) -> Since:
         abouts = self._mongo.db.about
         about = abouts.find_one({'id': 'apiroot'})
         pseudometric = 'came to visit'
 
         if not about:
             abouts.insert_one({'id': 'apiroot', 'time': dt.datetime.utcnow()})
-            return None
+            return Since('Someone came to visit')
 
         abouts.update_one(
             {'id': 'apiroot'}, {'$set': {'time': dt.datetime.utcnow()}},
         )
-        return Since(about['time'])
+        return Since('Someone came to visit', [about['time']])
+
+    def registration_timer(self) -> Since:
+        users = self._mongo.db.users
+        dates: List[dt.datetime] = sorted(
+            [
+                rec.get('registrationDate') for rec
+                in users.find({}, {'_id': 0, 'registrationDate': 1})
+                if rec.get('registrationDate')
+            ]
+        )
+        return Since('Our communit grew', dates)
 
     def get_user_timers(self, user: User) -> Iterable[Timer]:
         timers = self._mongo.db.timers

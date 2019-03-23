@@ -16,6 +16,6 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.App-main {
+  min-height: calc(100% - 3em);
 }

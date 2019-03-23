@@ -10,7 +10,7 @@ export default class Header extends Component {
 
   render() {
     const { isLoggedIn, error, onLogin, onLogout, onRegister, userName } = this.props;
-    const ErrorDiv = error && <div>{error}</div>;
+    const ErrorDiv = error && <div className="-error">{error}</div>;
     const buttons = [];
     let User;
     if (!isLoggedIn) {

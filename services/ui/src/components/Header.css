@@ -11,3 +11,8 @@
   margin: 0;
   display: inline-block;
 }
+
+.Header > .-error {
+  display: inline-block;
+  margin-left: 5em;
+}
