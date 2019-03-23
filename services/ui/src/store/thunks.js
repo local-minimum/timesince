@@ -1,5 +1,8 @@
 import api from '../api';
-import { setUser, clearUser, setError, setFeed, setOverlayError, hideOverlay } from './actions';
+import {
+  setUser, clearUser, setError, setFeed, setOverlayError, clearRegisterForm,
+  clearLoginForm,
+} from './actions';
 
 export function retrieveUserState() {
   return function(dispatch) {
@@ -22,7 +25,7 @@ export function registerUser(name, password, email) {
   return function(dispatch) {
     return api.registerUser(name, password, email).then(
       response => {
-        dispatch(hideOverlay());
+        dispatch(clearRegisterForm());
         api.login(name, password)
           .then(
             user => dispatch(setUser(user)),
@@ -42,7 +45,7 @@ export function loginUser(name, password) {
   return function(dispatch) {
     return api.login(name, password).then(
       user => {
-        dispatch(hideOverlay());
+        dispatch(clearLoginForm());
         dispatch(setUser(user));
       },
       err => dispatch(setOverlayError(

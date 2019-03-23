@@ -21,9 +21,17 @@ export function getFeed(state) {
 }
 
 export function isShowingRegisterForm(state) {
-  return state.overlayForm === OVERLAY.REGISTER;
+  return state.overlay === OVERLAY.REGISTER;
 }
 
 export function registerForm(state) {
   return state.register;
+}
+
+export function isShowingLoginForm(state) {
+  return state.overlay === OVERLAY.LOGIN;
+}
+
+export function loginForm(state) {
+  return state.login;
 }

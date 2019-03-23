@@ -11,8 +11,11 @@ from .timeutil import Since
 
 
 class User:
-    def __init__(self, name, session_id=None):
-        self._id = session_id if session_id is not None else str(uuid4().int + hash(name))
+    def __init__(self, name, access_token=None):
+        self._access_token = (
+            access_token if access_token is not None
+            else str(uuid4().int + hash(name))
+        )
         self._name = name
 
     @property
@@ -32,12 +35,8 @@ class User:
     def is_anonymous(self):
         return False
 
-    @property
-    def session_id(self):
-        return self._id
-
     def get_id(self):
-        pass
+        return self._access_token
 
     def __str__(self):
         return '<User {} (id {})>'.format(self._name, self._id)
@@ -80,18 +79,21 @@ class Gateway:
                 user = User(userrequest.name)
                 users.update_one(
                     {'_id': userrecord['_id']},
-                    {'$set': {'session': user.session_id}},
+                    {'$set': {
+                        'accessToken': user.get_id(),
+                        'loginDate': dt.datetime.utcnow(),
+                    }},
                 )
                 return user
         return None
 
-    def get_user_session(self, session_id) -> Optional[User]:
+    def get_user_session(self, access_token) -> Optional[User]:
         users = self._mongo.db.users
-        filt = {'session': session_id}
+        filt = {'accessToken': access_token}
         if users.count(filt) == 1:
             userrecord = users.find_one(filt)
             if userrecord:
-                return User(userrecord['name'], session=session_id)
+                return User(userrecord['name'], access_token=access_token)
         return None
 
     def remove_user_session(self, user: User) -> None:
@@ -99,7 +101,7 @@ class Gateway:
         userid = self.get_userid(user)
         users.update_one(
             {'_id': userid},
-            {'$set': {'session': None}},
+            {'$set': {'accessToken': None}},
         )
 
     def register_user(self, userrequest: RequestUser) -> Optional[User]:
@@ -112,8 +114,11 @@ class Gateway:
         hashpass = bcrypt.hashpw(userrequest.password.encode('utf8'), bcrypt.gensalt())
         user = User(userrequest.name)
         users.insert({
-            'name': userrequest.name, 'password': hashpass,
-            'session': user.session_id,
+            'name': userrequest.name,
+            'password': hashpass,
+            'email': userrequest.email,
+            'registrationDate': dt.datetime.utcnow(),
+            'accessToken': user.get_id(),
         })
         return user
 
@@ -125,7 +130,7 @@ class Gateway:
 
     def get_userid(self, user: User) -> ObjectId:
         users = self._mongo.db.users
-        record = users.find_one({'session': user.session_id})
+        record = users.find_one({'accessToken': user.get_id()})
         return record['_id']
 
     def root_visits(self) -> Optional[Since]:

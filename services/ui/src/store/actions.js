@@ -5,12 +5,17 @@ export const CLEAR_ERROR = 'CLEAR_ERROR';
 export const SET_FEED = 'SET_FEED';
 export const SET_OVERLAY = 'SET_OVERLAY';
 export const SET_OVERLAY_ERROR = 'SET_OVERLAY_ERROR';
+// REGISTER
 export const SET_REGISTER_NAME = 'SET_REGISTER_NAME';
 export const SET_REGISTER_PWD = 'SET_REGISTER_PWD';
 export const SET_REGISTER_REPEAT_PWD = 'SET_REGISTER_REPEAT_PWD';
 export const SET_REGISTER_EMAIL = 'SET_REGISTER_EMAIL';
-export const SUBMIT_REGISTER = 'SUBMIT_REGISTER';
 export const CLEAR_REGISTER_FORM = 'CLEAR_REGISTER_FORM';
+// LOGIN
+export const SET_LOGIN_NAME = 'SET_LOGIN_NAME';
+export const SET_LOGIN_PASSWORD = 'SET_LOGIN_PASSWORD';
+export const CLEAR_LOGIN_FORM = 'CLEAR_LOGIN_FORM';
+
 
 export const OVERLAY = {
   REGISTER: 'REGISTER',
@@ -43,16 +48,16 @@ export function setFeed(feed) {
   return { type: SET_FEED, feed };
 }
 
+// OVERLAYS
+
 export function setOverlayError(message) {
   return { type: SET_OVERLAY_ERROR, message };
 }
 
-export function showRegister() {
-  return { type: SET_OVERLAY, form: OVERLAY.REGISTER };
-}
+// REGISTER FORM
 
-export function hideOverlay () {
-  return { type: SET_OVERLAY, form: null };
+export function showRegister() {
+  return { type: SET_OVERLAY, overlay: OVERLAY.REGISTER };
 }
 
 export function updateRegisterName(user) {
@@ -71,10 +76,24 @@ export function updateRegesterEmail(email) {
   return { type: SET_REGISTER_EMAIL, email };
 }
 
-export function submitRegisterForm() {
-  return { type: SUBMIT_REGISTER };
-}
-
 export function clearRegisterForm() {
   return { type: CLEAR_REGISTER_FORM };
+}
+
+// LOGIN
+
+export function showLogin() {
+  return { type: SET_OVERLAY, overlay: OVERLAY.LOGIN };
+}
+
+export function updateLoginName(user) {
+  return { type: SET_LOGIN_NAME, user };
+}
+
+export function updateLoginPassword(password) {
+  return { type: SET_LOGIN_PASSWORD, password };
+}
+
+export function clearLoginForm() {
+  return { type: CLEAR_LOGIN_FORM };
 }

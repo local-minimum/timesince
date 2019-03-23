@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from typing import Optional
 import logging
 
 from flask import Flask, jsonify, request
@@ -8,7 +9,7 @@ from flask_login import (
 
 from .timeutil import Since
 from .inputvalidators import RequestUser, ValidationError
-from .gateway import Gateway
+from .gateway import Gateway, User
 
 
 def register_api(app: Flask, gateway: Gateway) -> None:
@@ -17,8 +18,16 @@ def register_api(app: Flask, gateway: Gateway) -> None:
     login_manager.init_app(app)
 
     @login_manager.user_loader
-    def load_user(user_id):
-        return gateway.get_user_session(user_id)
+    def load_user(access_token: str) -> Optional[User]:
+        user = gateway.get_user_session(access_token)
+        if user:
+            logging.info("Found user session {} token {}".format(
+                user.name,
+                user.get_id(),
+            ))
+        else:
+            logging.info("No user found for token {}".format(access_token))
+        return user
 
     @app.route('/', methods=['GET'])
     def apiroot():
@@ -39,9 +48,16 @@ def register_api(app: Flask, gateway: Gateway) -> None:
 
     @app.route('/login', methods=['POST'])
     def login():
-        user_request = RequestUser.from_request_data(request.get_json())
+        user_request = RequestUser.from_request_data(
+            request.get_json(), validate=False,
+        )
         user = gateway.validate_user(user_request)
         if user:
+            logging.info("Logging in {} with token {}".format(
+                user.name,
+                user.get_id(),
+            ))
+
             login_user(user)
             return jsonify(
                 {'name': current_user.name}
@@ -55,7 +71,7 @@ def register_api(app: Flask, gateway: Gateway) -> None:
     @login_required
     def logout():
         name = current_user.name
-        gateway.remove_session(current_user)
+        gateway.remove_user_session(current_user)
         logout_user()
         return jsonify(
             {'message': '{} logged out'.format(name)},

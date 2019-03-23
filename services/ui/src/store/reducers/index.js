@@ -1,11 +1,12 @@
 import { combineReducers } from 'redux';
 import {
   SET_ERROR, CLEAR_ERROR, OVERLAY, SET_OVERLAY, SET_OVERLAY_ERROR,
-  SUBMIT_REGISTER,
+  CLEAR_REGISTER_FORM, CLEAR_LOGIN_FORM,
  } from '../actions';
 import user from './user';
 import feed from './feed';
 import register from './register';
+import login from './login';
 
 function error(state = null, action) {
   switch (action.type) {
@@ -18,16 +19,17 @@ function error(state = null, action) {
   }
 }
 
-function overlayForm(state=null, action) {
+function overlay(state=null, action) {
   switch (action.type) {
     case SET_OVERLAY:
-      switch (action.form) {
-        case OVERLAY.REGISTER:
-          return action.form;
-        default:
-          return null;
+      if (OVERLAY[action.overlay] != null) {
+        return action.overlay;
+      } else if (action.overlay == null) {
+        return null;
       }
-    case SUBMIT_REGISTER:
+      return state;
+    case CLEAR_REGISTER_FORM:
+    case CLEAR_LOGIN_FORM:
       return null;
     default:
       return state;
@@ -38,6 +40,8 @@ function overlayError(state=null, action) {
   switch (action.type) {
     case SET_OVERLAY_ERROR:
       return action.message;
+    case CLEAR_LOGIN_FORM:
+    case CLEAR_REGISTER_FORM:
     case SET_OVERLAY:
       case null:
     default:
@@ -47,5 +51,6 @@ function overlayError(state=null, action) {
 }
 
 export default combineReducers({
-  error, user, feed, overlayForm, overlayError, register,
+  error, user, feed, overlay, overlayError, register,
+  login,
 });

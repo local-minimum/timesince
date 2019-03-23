@@ -1,15 +1,15 @@
 import { connect } from 'react-redux';
 
 import { isLoggedIn, getError, getUserName } from '../store/selectors';
-import { showRegister } from '../store/actions';
-import { retrieveUserState, logoutUser, loginUser } from '../store/thunks';
+import { showRegister, showLogin } from '../store/actions';
+import { retrieveUserState, logoutUser } from '../store/thunks';
 import HeaderComponent from '../components/Header';
 
 const mapDispatchToProps = dispatch => {
   return {
     onRegister: () => dispatch(showRegister()),
     onMount: () => dispatch(retrieveUserState()),
-    onLogin: (user, password) => dispatch(loginUser(user, password)),
+    onLogin: () => dispatch(showLogin()),
     onLogout: () => dispatch(logoutUser()),
   };
 };

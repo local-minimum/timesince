@@ -40,7 +40,7 @@ class RequestUser:
     )
 
     @classmethod
-    def from_request_data(cls, requestdata) -> "RequestUser":
+    def from_request_data(cls, requestdata, validate: bool=True) -> "RequestUser":
         if requestdata is None:
             raise ValidationError()
         params = {}
@@ -49,7 +49,7 @@ class RequestUser:
             validator = attribute.metadata.get('validator')
             if json_name and json_name in requestdata:
                 value = requestdata[json_name]
-                if validator and not validator(value):
+                if validate and validator and not validator(value):
                     raise ValidationError()
 
                 params[attribute.name] = value

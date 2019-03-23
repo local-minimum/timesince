@@ -1,18 +1,19 @@
 import React, { Component } from 'react';
 import './index.css';
 import RegisterForm from './RegisterForm';
+import LoginForm from './LoginForm';
 
 export default class Overlay extends Component {
   render() {
-    const { showRegister, onHide, onClearRegister, overlayError } = this.props;
+    const { showRegister, showLogin, overlayError } = this.props;
     let Overlay;
     if (showRegister) {
       const {
         onUpdateRegisterName, onUpdateRegisterPwd, onUpdateRegisterRepeatPwd,
-        onUpdateRegesterEmail, registerForm, onRegister,
+        onUpdateRegesterEmail, registerForm, onRegister, onClearRegister,
       } = this.props;
       Overlay = <RegisterForm
-          onHide={() => { onHide(); onClearRegister(); }}
+          onHide={onClearRegister}
           onUpdateRegisterName={onUpdateRegisterName}
           onUpdateRegisterPwd={onUpdateRegisterPwd}
           onUpdateRegisterRepeatPwd={onUpdateRegisterRepeatPwd}
@@ -21,7 +22,21 @@ export default class Overlay extends Component {
           error={overlayError}
           {...registerForm}
       />;
+    } else if (showLogin) {
+      const {
+        onUpdateLoginName, onUpdateLoginPwd, onClearLogin, onLogin,
+        loginForm,
+      } = this.props;
+      Overlay = <LoginForm
+        onHide={onClearLogin}
+        onUpdateLoginName={onUpdateLoginName}
+        onUpdateLoginPwd={onUpdateLoginPwd}
+        onLogin={() => onLogin(loginForm.user, loginForm.password)}
+        error={overlayError}
+        {...loginForm}
+      />
     }
+
     if (Overlay) {
       return (
         <div className="Overlay">
