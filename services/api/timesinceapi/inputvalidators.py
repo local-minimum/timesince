@@ -8,7 +8,7 @@ class ValidationError(Exception):
 
 def validpassword(pwd) -> bool:
     complexity = set(c for c in pwd)
-    return len(pwd) > 8 and len(complexity) > 5
+    return len(pwd) > 8 and len(complexity) > 4
 
 
 def validemail(email) -> bool:
@@ -35,7 +35,8 @@ class RequestUser:
         metadata={
             'json_name': 'email',
             'validator': validemail,
-        }
+        },
+        default=None,
     )
 
     @classmethod
@@ -55,5 +56,5 @@ class RequestUser:
 
         try:
             return cls(**params)
-        except AttributeError:
+        except (AttributeError, TypeError):
             raise ValidationError()

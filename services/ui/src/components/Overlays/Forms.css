@@ -1,0 +1,40 @@
+.Form {
+  margin: auto;
+  padding: 2em;
+  width: 50%;
+  background: #fff;
+  border-radius: 1em;
+  margin-top: 8em;
+}
+
+.From > .action-buttons {
+  margin-top: 1.5em;
+}
+
+.Form > label {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+.Form > label > .input-help {
+  font-size: 70%;
+  font-style: italic;
+}
+
+.Form > label > input {
+  margin-left: 1em;
+}
+
+.Form > .action-buttons {
+  padding-top: 0.5em;
+}
+
+.Form > .action-buttons > *{
+  float: right;
+}
+
+.Form .-error {
+  color: #9932CC;
+  font-weight: bold;
+  font-size: 70%;
+}

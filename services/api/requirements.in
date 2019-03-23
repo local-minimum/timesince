@@ -1,3 +1,4 @@
+bcrypt
 attrs
 flask
 flask-login

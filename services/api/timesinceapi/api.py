@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import logging
 
 from flask import Flask, jsonify, request
 from flask_login import (
@@ -6,13 +7,13 @@ from flask_login import (
 )
 
 from .timeutil import Since
-from .inputvalidators import RequestUser
+from .inputvalidators import RequestUser, ValidationError
 from .gateway import Gateway
 
 
 def register_api(app: Flask, gateway: Gateway) -> None:
 
-    login_manager = LoginManager()
+    login_manager: LoginManager = LoginManager()
     login_manager.init_app(app)
 
     @login_manager.user_loader
@@ -38,12 +39,12 @@ def register_api(app: Flask, gateway: Gateway) -> None:
 
     @app.route('/login', methods=['POST'])
     def login():
-        user_request = UserRequest.from_request_data(request.get_json())
+        user_request = RequestUser.from_request_data(request.get_json())
         user = gateway.validate_user(user_request)
         if user:
             login_user(user)
             return jsonify(
-                {'message': '{} logged in'.format(user_request.name)},
+                {'name': current_user.name}
             ), HTTPStatus.OK
         return (
             jsonify({'message': 'Invalid username & password combination'}),
@@ -63,8 +64,11 @@ def register_api(app: Flask, gateway: Gateway) -> None:
     @app.route('/users', methods=['PUT'])
     def register_user():
         try:
-            userrequest = UserRequest.from_request_data(request.get_json())
+            userrequest = RequestUser.from_request_data(request.get_json())
         except ValidationError:
+            logging.info("Failed to validate user on request {}".format(
+                request.get_json(),
+            ))
             return (
                 jsonify({'message': 'Bad password or username'}),
                 HTTPStatus.UNAUTHORIZED,
@@ -81,8 +85,13 @@ def register_api(app: Flask, gateway: Gateway) -> None:
                 HTTPStatus.UNAUTHORIZED,
             )
         return jsonify(
-            {'message': 'User "{}" created"'.format(userrequest.name)},
-        ), OK
+            {'message': 'User "{}" created'.format(userrequest.name)},
+        ), HTTPStatus.OK
+
+    @app.route('/user', methods=['Get'])
+    @login_required
+    def get_current_user(self):
+        return jsonify({'name': current_user.name}), HTTPStatus.OK
 
     @app.route('/timers', methods=['GET'])
     @login_required
@@ -110,7 +119,7 @@ def register_api(app: Flask, gateway: Gateway) -> None:
         return gateway.record_event(current_user, timerid)
 
     @app.route('/publictimers/{publishedid}', methods=['GET'])
-    def get_public_timer(self, published):
+    def get_public_timer(self, publishedid):
         timer = gateway.get_public_timer(publishedid)
         if not timer:
             return jsonify({}), HTTPStatus.NOTFOUND

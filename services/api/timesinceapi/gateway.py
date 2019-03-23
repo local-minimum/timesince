@@ -3,6 +3,7 @@ from uuid import uuid4
 from typing import Optional, Iterable
 
 import attr
+import bcrypt
 from flask_pymongo import PyMongo, ObjectId
 
 from .inputvalidators import RequestUser
@@ -75,10 +76,10 @@ class Gateway:
         users = self._mongo.db.users
         userrecord = users.find_one({'name': userrequest.name})
         if userrecord:
-            if bcrypt.checkpw(userrequest.password, userrecord['password']):
+            if bcrypt.checkpw(userrequest.password.encode('utf8'), userrecord['password']):
                 user = User(userrequest.name)
                 users.update_one(
-                    {'_id': userrecord._id},
+                    {'_id': userrecord['_id']},
                     {'$set': {'session': user.session_id}},
                 )
                 return user
@@ -88,9 +89,9 @@ class Gateway:
         users = self._mongo.db.users
         filt = {'session': session_id}
         if users.count(filt) == 1:
-            user_record = users.find_one(filt)
-            if user_record:
-                return User(user_record['name'], session=session_id)
+            userrecord = users.find_one(filt)
+            if userrecord:
+                return User(userrecord['name'], session=session_id)
         return None
 
     def remove_user_session(self, user: User) -> None:
@@ -101,18 +102,17 @@ class Gateway:
             {'$set': {'session': None}},
         )
 
-
     def register_user(self, userrequest: RequestUser) -> Optional[User]:
-        if userrecord.name == userrequest.password:
+        if userrequest.name == userrequest.password:
             return None
 
         users = self._mongo.db.users
-        if users.find_one({'name': username}):
+        if users.find_one({'name': userrequest.name}):
             return None
-        hashpass = bcrypt.hashpw(password, bcrypt.gensalt())
+        hashpass = bcrypt.hashpw(userrequest.password.encode('utf8'), bcrypt.gensalt())
         user = User(userrequest.name)
         users.insert({
-            'name': username, 'password': hashpass,
+            'name': userrequest.name, 'password': hashpass,
             'session': user.session_id,
         })
         return user
@@ -124,7 +124,7 @@ class Gateway:
         return False
 
     def get_userid(self, user: User) -> ObjectId:
-        user = self._mongo.db.users
+        users = self._mongo.db.users
         record = users.find_one({'session': user.session_id})
         return record['_id']
 
@@ -150,7 +150,7 @@ class Gateway:
 
     def get_public_timer(self, publishedid: str) -> Optional[Timer]:
         timers = self._mongo.db.timers
-        if not timerid:
+        if not publishedid:
             return None
         record = timers.find_one({'publishedid': publishedid})
         if record:

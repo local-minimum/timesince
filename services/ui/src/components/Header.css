@@ -1,0 +1,13 @@
+.Header {
+  color: #ffe9ec;
+  background-color: #ffb6c1;
+  padding: .2em 2em .4em;
+}
+
+.Header H1 {
+  font-size: 110%;
+  font-style: italic;
+  font-weight: bolder;
+  margin: 0;
+  display: inline-block;
+}
