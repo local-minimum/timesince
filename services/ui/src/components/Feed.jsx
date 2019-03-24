@@ -7,19 +7,21 @@ import Welcome from './Feed.Welcome';
 
 export default class Feed extends Component {
   render() {
-    const { feed, onCreateTimer, onRegisterEvent } = this.props;
+    const { feed, onCreateTimer, onRegisterEvent, showAddTimer } = this.props;
     const lang = "ENGLISH";
     let Feed;
+    let feedItemSize = '-few';
     if (!feed || feed.length === 0) {
       Feed = [
         <Info {...Welcome[lang]} dismissable className="-few" />,
-        <NewTimerCard onCreate={onCreateTimer} className="-few" />,
       ];
     } else {
-      const feedItemSize = feed.length <= 4 ? '-few' : '-many';
+      feedItemSize = feed.length <= 4 - (showAddTimer ? 1 : 0) ? '-few' : '-many';
       Feed = feed.map(
         item => <Timer key={item.title} {...item} className={feedItemSize} onRegisterEvent={onRegisterEvent} />
       );
+    }
+    if (showAddTimer) {
       Feed.push(
         <NewTimerCard onCreate={onCreateTimer} className={feedItemSize} />,
       );
