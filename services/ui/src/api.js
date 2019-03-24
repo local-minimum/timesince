@@ -8,6 +8,10 @@ function getVisitationTimer() {
   return $.getJSON('/api');
 }
 
+function getMyFeed() {
+  return $.getJSON('/api/timers');
+}
+
 function login(user, password) {
   return $.ajax({
     type: "POST",
@@ -48,6 +52,20 @@ function registerUser(user, password, email) {
   );
 }
 
+function createTimer(title) {
+  return $.ajax({
+    type: "PUT",
+    url: "/api/timers",
+    data: JSON.stringify({ title }),
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+  }).then(
+    response => Promise.resolve(response),
+    err => Promise.reject(err.responseJSON),
+  );
+}
+
 export default {
   getUser, getVisitationTimer, registerUser, login, logout,
+  createTimer, getMyFeed,
 };

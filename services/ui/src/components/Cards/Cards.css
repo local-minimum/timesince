@@ -3,10 +3,60 @@
   margin-top: 8em;
   padding: 2em;
   background: #fff;
-  flex-basis: 20%;
   margin: 0.5em;
+}
+
+.Card.-many {
+  flex-basis: 28%;
+}
+
+.Card.-few {
+  flex-basis: 48%;
 }
 
 .Card > H1 {
   font-size: 120%;
+}
+
+.Card > .-dismiss {
+  float: right;
+  border-radius: 1em;
+  margin-top: -1em;
+  margin-right: -1em;
+  padding: 0.2em;
+  border: solid #ffb6c1 1px;
+  color: #ffb6c1;
+  width: 1em;
+  text-align: center;
+}
+
+.Card > .-body {
+  font-style: italic;
+}
+
+.Card > .-createForm > .-buttons {
+  margin-top: 0.5em;
+}
+
+.Card > .-createForm > .-buttons > * {
+  float: right;
+  border-color: #ffb6c1;
+  color: #ffb6c1;
+}
+
+.Card > .-createButton {
+  font-weight: 100;
+  font-size: 400%;
+  border: solid #ffb6c1;
+  color: #ffb6c1;
+  width: 2em;
+  height: 2em;
+  border-radius: 2em;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.Card > .-createButton > div {
+  margin-top: -.05em;
 }

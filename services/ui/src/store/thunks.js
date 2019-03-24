@@ -9,6 +9,15 @@ export function retrieveUserState() {
     return api.getUser().then(
       user => {
         dispatch(setUser(user));
+        api.getMyFeed().then(
+          response => dispatch(setFeed(response.feed)),
+          err => {
+            dispatch(setFeed([]));
+            dispatch(setError(
+              err.message ? err.message : 'Unable to retrieve feed'
+            ));
+          },
+        );
       },
       error => {
         dispatch(clearUser());
@@ -47,6 +56,15 @@ export function loginUser(name, password) {
       user => {
         dispatch(clearLoginForm());
         dispatch(setUser(user));
+        api.getMyFeed().then(
+          response => dispatch(setFeed(response.feed)),
+          err => {
+            dispatch(setFeed([]));
+            dispatch(setError(
+              err.message ? err.message : 'Unable to retrieve feed'
+            ));
+          },
+        );
       },
       err => dispatch(setOverlayError(
         err.message ? err.message : 'Unable to login.'
@@ -60,6 +78,20 @@ export function logoutUser() {
     return api.logout().then(
       () => dispatch(clearUser()),
       err => dispatch(setError(err.message ? err.message : 'Unable to logout')),
+    );
+  }
+}
+
+export function createTimer(title) {
+  return function(dispatch) {
+    return api.createTimer(title).then(
+      () => {
+        return api.getMyFeed().then(
+          feed => dispatch(setFeed(feed)),
+          err => dispatch(setError(err.message ? err.message : 'Unable to create timer')),
+        );
+      },
+      err => dispatch(setError(err.message ? err.message : 'Unable to create timer')),
     );
   }
 }

@@ -7,3 +7,34 @@
   background-color: #ffe9ec;
   opacity: 0.95;
 }
+
+Input {
+  color: #fff;
+  background-color: #ffb6c1;
+  border: dotted #ffe9ec 2px;
+  border-radius: 0.25em;
+  margin: 0.5em;
+  padding: 0.15em 0.5em;
+}
+
+.-centerY {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.-centerX {
+  margin: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.-center {
+  position: absolute;
+  margin: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

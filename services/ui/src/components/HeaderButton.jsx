@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
 import './HeaderButton.css';
+import { joinClassName } from '../util';
 
 export default class HeaderButton extends Component {
   render() {
-    const { title, onClick, text, disabled } = this.props
-    let className = "HeaderButton"
-    if (disabled) {
-      className = "HeaderButton -disabled"
-    }
-    return <div title={title} onClick={!disabled && onClick} className={className}>{text}</div>
+    const { title, onClick, text, disabled, className } = this.props
+    let classNameCompound = joinClassName(["HeaderButton", className, disabled && '-disabled']);
+    return <div title={title} onClick={!disabled && onClick} className={classNameCompound}>{text}</div>
   }
 }
