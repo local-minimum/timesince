@@ -1,0 +1,15 @@
+.ItHappenedButton {
+  position: relative;
+  border: solid #ffb6c1;
+  color: #ffb6c1;
+  width: 10em;
+  height: 10em;
+  border-radius: 10em;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.Card > div {
+  margin-top: -.05em;
+}

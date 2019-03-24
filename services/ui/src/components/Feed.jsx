@@ -7,10 +7,10 @@ import Welcome from './Feed.Welcome';
 
 export default class Feed extends Component {
   render() {
-    const { feed, onCreateTimer } = this.props;
+    const { feed, onCreateTimer, onRegisterEvent } = this.props;
     const lang = "ENGLISH";
     let Feed;
-    if (!feed || feed.length == 0) {
+    if (!feed || feed.length === 0) {
       Feed = [
         <Info {...Welcome[lang]} dismissable className="-few" />,
         <NewTimerCard onCreate={onCreateTimer} className="-few" />,
@@ -18,7 +18,7 @@ export default class Feed extends Component {
     } else {
       const feedItemSize = feed.length <= 4 ? '-few' : '-many';
       Feed = feed.map(
-        item => <Timer key={item.title} {...item} className={feedItemSize} />
+        item => <Timer key={item.title} {...item} className={feedItemSize} onRegisterEvent={onRegisterEvent} />
       );
       Feed.push(
         <NewTimerCard onCreate={onCreateTimer} className={feedItemSize} />,

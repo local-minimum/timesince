@@ -1,4 +1,4 @@
-.HeaderButton {
+.BasicButton {
   border: 1px;
   border-style: solid;
   border-color: #ffe9ec;
@@ -10,6 +10,6 @@
   cursor: pointer;
 }
 
-.HeaderButton.-disabled {
+.BasicButton.-disabled {
   cursor: not-allowed;
 }

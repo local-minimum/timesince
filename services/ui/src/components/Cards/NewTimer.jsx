@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './Cards.css';
 import { joinClassName }from '../../util';
-import HeaderButton from '../HeaderButton';
+import BasicButton from '../BasicButton';
 
 export default class NewTimerCard extends Component {
   constructor(props) {
@@ -51,8 +51,8 @@ export default class NewTimerCard extends Component {
             <input type="text" onChange={this.onUpdateTitle} value={title} placeholder="Since button was pressed" />
           </label>
           <div class="-buttons">
-            <HeaderButton title='Create' onClick={this.onSubmit} text="Create" disabled={!canSubmit} />
-            <HeaderButton title='Abort' onClick={this.onAbortCreate} text="Abort" />
+            <BasicButton title='Create' onClick={this.onSubmit} text="Create" disabled={!canSubmit} />
+            <BasicButton title='Abort' onClick={this.onAbortCreate} text="Abort" />
           </div>
         </div>
       );

@@ -65,7 +65,20 @@ function createTimer(title) {
   );
 }
 
+function addTimerEvent(timerId) {
+  return $.ajax({
+    type: "PUT",
+    url: `/api/timers/${timerId}`,
+    data: JSON.stringify({}),
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+  }).then(
+    response => Promise.resolve(response),
+    err => Promise.reject(err.responseJSON),
+  );
+}
+
 export default {
   getUser, getVisitationTimer, registerUser, login, logout,
-  createTimer, getMyFeed,
+  createTimer, getMyFeed, addTimerEvent,
 };

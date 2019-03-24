@@ -87,11 +87,26 @@ export function createTimer(title) {
     return api.createTimer(title).then(
       () => {
         return api.getMyFeed().then(
-          feed => dispatch(setFeed(feed)),
+          response => dispatch(setFeed(response.feed)),
           err => dispatch(setError(err.message ? err.message : 'Unable to create timer')),
         );
       },
       err => dispatch(setError(err.message ? err.message : 'Unable to create timer')),
     );
   }
+}
+
+export function addTimerEvent(timerId) {
+  return function(dispatch) {
+    return api.addTimerEvent(timerId).then(
+      () => {
+        return api.getMyFeed().then(
+          response => dispatch(setFeed(response.feed)),
+          err => dispatch(setError(err.message ? err.message : 'Unable to create timer')),
+        );
+      },
+      err => dispatch(setError(err.message ? err.message : 'Failed to register event')),
+    );
+  }
+
 }

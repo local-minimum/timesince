@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './Forms.css';
-import HeaderButton from '../HeaderButton';
+import BasicButton from '../BasicButton';
 
 export default class LoginForm extends Component {
   render() {
@@ -26,8 +26,8 @@ export default class LoginForm extends Component {
         </label>
         {Error}
         <div class="action-buttons">
-          <HeaderButton title='Login' onClick={submit} text="Login" disabled={!canSubmit} />
-          <HeaderButton title='Cancel' onClick={onHide} text="Cancel" />
+          <BasicButton title='Login' onClick={submit} text="Login" disabled={!canSubmit} />
+          <BasicButton title='Cancel' onClick={onHide} text="Cancel" />
         </div>
       </div>
     );

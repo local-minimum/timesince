@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './Forms.css'
-import HeaderButton from '../HeaderButton';
+import BasicButton from '../BasicButton';
 
 export default class RegisterForm extends Component {
   render() {
@@ -42,8 +42,8 @@ export default class RegisterForm extends Component {
         </label>
         {Error}
         <div class="action-buttons">
-          <HeaderButton title='Register new user' onClick={submit} text="Register" disabled={!canSubmit} />
-          <HeaderButton title='Cancel' onClick={onHide} text="Cancel" />
+          <BasicButton title='Register new user' onClick={submit} text="Register" disabled={!canSubmit} />
+          <BasicButton title='Cancel' onClick={onHide} text="Cancel" />
         </div>
       </div>
     );

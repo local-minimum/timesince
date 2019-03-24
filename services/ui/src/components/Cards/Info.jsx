@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './Cards.css';
 import { joinClassName } from '../../util';
-import HeaderButton from '../HeaderButton';
+import BasicButton from '../BasicButton';
 
 export default class Info extends Component {
   constructor(props) {
@@ -21,7 +21,7 @@ export default class Info extends Component {
     const jointClassName = joinClassName(['Card', className]);
     let Dismiss = null;
     if (dismissable) {
-      Dismiss = <HeaderButton onClick={this.onDismiss} title="Dismiss" text="X" className='-dismiss' />;
+      Dismiss = <BasicButton onClick={this.onDismiss} title="Dismiss" text="X" className='-dismiss' />;
     }
     return (
       <div className={jointClassName}>

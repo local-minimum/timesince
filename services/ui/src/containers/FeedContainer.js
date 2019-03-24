@@ -1,13 +1,14 @@
 import { connect } from 'react-redux';
 
 import { getFeed } from '../store/selectors';
-import { createTimer } from '../store/thunks';
+import { createTimer, addTimerEvent } from '../store/thunks';
 
 import FeedComponent from '../components/Feed';
 
 const mapDispatchToProps = dispatch => {
   return {
     onCreateTimer: (title) => dispatch(createTimer(title)),
+    onRegisterEvent: (timerId) => dispatch(addTimerEvent(timerId)),
   };
 }
 
