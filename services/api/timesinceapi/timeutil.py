@@ -4,7 +4,7 @@ from typing import Dict, Any, Optional, List
 
 class Since:
     def __init__(
-        self, title: str, when: Optional[List[dt.datetime]], *,
+        self, title: str, when: Optional[List[dt.datetime]] = None, *,
         timerid: Optional[str] = None,
         publishedid: Optional[str] = None,
     ) -> None:
