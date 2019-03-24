@@ -76,7 +76,14 @@ export function loginUser(name, password) {
 export function logoutUser() {
   return function(dispatch) {
     return api.logout().then(
-      () => dispatch(clearUser()),
+      () => {
+        dispatch(setFeed([]));
+        dispatch(clearUser());
+        api.getVisitationTimer().then(
+          response => dispatch(setFeed(response.feed)),
+          error => dispatch(setError('Could not reach server.')),
+        );
+      },
       err => dispatch(setError(err.message ? err.message : 'Unable to logout')),
     );
   }
