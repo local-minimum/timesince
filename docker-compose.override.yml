@@ -1,7 +1,0 @@
----
-version: '3.3'
-
-services:
-  ui:
-    volumes:
-      - './services/ui/build:/usr/local/apache2/htdocs/'
