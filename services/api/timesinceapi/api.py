@@ -3,12 +3,12 @@ from typing import Optional
 
 from flask import Flask, jsonify, request
 from flask_login import (
-    LoginManager, logout_user, login_user, current_user,
+    LoginManager, logout_user, login_user, current_user, login_required
 )
 
 from .timeutil import Since
 from .inputvalidators import RequestUser, ValidationError
-from .gateway import Gateway, User
+from .gateway import Gateway, TimeSinceUser
 
 
 def register_api(app: Flask, gateway: Gateway) -> None:
@@ -17,26 +17,11 @@ def register_api(app: Flask, gateway: Gateway) -> None:
     login_manager.init_app(app)
 
     @login_manager.user_loader
-    def load_user(access_token: str) -> Optional[User]:
+    def load_user(access_token: str) -> Optional[TimeSinceUser]:
         user = gateway.get_user_session(access_token)
-        app.logger.info(user)
-        if user:
-            app.logger.info("Found user session {} token {}".format(
-                user.name,
-                user.get_id(),
-            ))
-        else:
+        if not user:
             app.logger.info("No user found for token {}".format(access_token))
         return user
-
-    def login_required(f):
-        def wrapper(*args, **kwargs):
-            if not current_user.is_authenticated:
-                return jsonify({'message': 'Access Denied'}), HTTPStatus.FORBIDDEN
-            else:
-                return f(*args, **kwargs)
-        wrapper.__name__ = f.__name__
-        return wrapper
 
     @app.route('/', methods=['GET'])
     def apiroot():
@@ -60,15 +45,14 @@ def register_api(app: Flask, gateway: Gateway) -> None:
         )
         user = gateway.validate_user(user_request)
         if user:
-            app.logger.info("Logging in {} with token {}".format(
-                user.name,
-                user.get_id(),
-            ))
-
             login_user(user)
             return jsonify(
-                {'name': current_user.name}
+                {'name': user.name}
             ), HTTPStatus.OK
+
+        app.logger.warning("Failed logging in to {}".format(
+            user_request.name,
+        ))
         return (
             jsonify({'message': 'Invalid username & password combination'}),
             HTTPStatus.UNAUTHORIZED,
@@ -113,44 +97,47 @@ def register_api(app: Flask, gateway: Gateway) -> None:
 
     @app.route('/user', methods=['Get'])
     @login_required
-    def get_current_user(self):
-        app.logger.info("Getting current user");
-        return jsonify({'name': current_user.name}), HTTPStatus.OK
+    def get_current_user():
+        user = current_user
+        return jsonify({'name': user.name}), HTTPStatus.OK
 
     @app.route('/timers', methods=['GET'])
     @login_required
-    def get_timers(self):
+    def get_timers():
+        user = current_user
         return jsonify({
-            'timers': list(gateway.get_user_timers(current_user))
+            'feed': list(since.todict() for since in gateway.get_user_timers(user))
         }), HTTPStatus.OK
 
     @app.route('/timers', methods=['PUT'])
     @login_required
-    def create_timer(self):
+    def create_timer():
         json = request.get_json()
+        user = current_user
         if not json or not json.get('title'):
             return jsonify({'message': 'Missing title'}), HTTPStatus.BADREQUEST
-        return jsonify(
-            gateway.create_timer(
-                current_user,
-                json['title'],
-                bool(json.get('ithappendnow', False)),
-            ),
-        ), HTTPStatus.OK
+        gateway.create_timer(
+            user,
+            json['title'],
+            bool(json.get('ithappendnow', False)),
+        )
+        return jsonify({'message': 'Timer created'}), HTTPStatus.OK
 
     @app.route('/timers/{timerid}/observe', methods=['PUT'])
-    def record_event(self, timerid):
-        return gateway.record_event(current_user, timerid)
+    def record_event(timerid):
+        user = current_user
+        return gateway.record_event(user, timerid)
 
     @app.route('/publictimers/{publishedid}', methods=['GET'])
-    def get_public_timer(self, publishedid):
-        timer = gateway.get_public_timer(publishedid)
-        if not timer:
+    def get_public_timer(publishedid):
+        since = gateway.get_public_timer(publishedid)
+        if not since:
             return jsonify({}), HTTPStatus.NOTFOUND
-        return jsonify(timer), HTTPStatus.OK
+        return jsonify(since.todict()), HTTPStatus.OK
 
     @app.route('/publictimers}', methods=['GET'])
-    def get_public_timers(self):
+    def get_public_timers():
+        user = current_user
         return jsonify({
-            'timers': list(gateway.get_listed_public_timers(current_user))
+            'feed': list(since.todist() for since in gateway.get_listed_public_timers(user)),
         }), HTTPStatus.OK

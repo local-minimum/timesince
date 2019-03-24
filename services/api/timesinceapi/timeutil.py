@@ -3,9 +3,16 @@ from typing import Dict, Any, Optional, List
 
 
 class Since:
-    def __init__(self, title: str, when: Optional[List[dt.datetime]]) -> None:
+    def __init__(
+        self, title: str, when: Optional[List[dt.datetime]], *,
+        timerid: Optional[str] = None,
+        publishedid: Optional[str] = None,
+    ) -> None:
         self._history = when
         self._title = title
+        self._timerid = timerid
+        self._publishedid = publishedid
+
         if not when:
             self._value = None
             self._unit = 'never'
@@ -59,4 +66,14 @@ class Since:
             'title': self.title,
             'value': self.value,
             'unit': self.unit,
+            'published': self._publishedid,
+            'id': str(self._timerid),
         }
+
+    @classmethod
+    def from_record(cls, record: Dict) -> "Since":
+        timerid = record['_id']
+        title = record['title']
+        events = record['events']
+        publishedid = record['publishedid']
+        return cls(title, events, timerid=timerid, publishedid=publishedid)

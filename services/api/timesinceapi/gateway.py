@@ -2,7 +2,6 @@ import datetime as dt
 from uuid import uuid4
 from typing import Optional, Iterable, List
 
-import attr
 import bcrypt
 from flask_pymongo import PyMongo, ObjectId
 from flask_login import UserMixin
@@ -11,7 +10,7 @@ from .inputvalidators import RequestUser
 from .timeutil import Since
 
 
-class User(UserMixin):
+class TimeSinceUser(UserMixin):
     def __init__(self, name, access_token=None):
         super().__init__()
         self._access_token = (
@@ -19,10 +18,6 @@ class User(UserMixin):
             else str(uuid4().int + hash(name))
         )
         self._name = name
-
-    @property
-    def self(self):
-        return self
 
     @property
     def name(self):
@@ -45,46 +40,21 @@ class User(UserMixin):
         return self._access_token
 
     def __str__(self):
-        return '<User {} (access token {})>'.format(
+        return '<TimeSinceUser {} (access token {})>'.format(
             self._name, self._access_token,
         )
-
-
-@attr.s(frozen=True)
-class Timer:
-    timerid = attr.ib(metadata={'record_name': '_id'})
-    title = attr.ib(metadata={'record_name': 'title'})
-    most_recent = attr.ib(metadata={
-        'generated': lambda record: Since(record.get('events', [None])),
-    })
-    events = attr.ib(default=[], metadata={'record_name': 'events'})
-    publishedid = attr.ib(
-        default=None, metadata={'record_name': 'publishedid'},
-    )
-
-    @classmethod
-    def from_record(cls, record) -> "Timer":
-        params = {}
-        for attribute in attr.fields(cls):
-            generated = attribute.metadata.get('generated')
-            record_name = attribute.metadata.get('record_name')
-            if generated:
-                params[attribute.name] = generated(record)
-            elif record_name:
-                params[attribute.name] = record.get(record_name)
-        return cls(**params)
 
 
 class Gateway:
     def __init__(self, app):
         self._mongo = PyMongo(app)
 
-    def validate_user(self, userrequest: RequestUser) -> Optional[User]:
+    def validate_user(self, userrequest: RequestUser) -> Optional[TimeSinceUser]:
         users = self._mongo.db.users
         userrecord = users.find_one({'name': userrequest.name})
         if userrecord:
             if bcrypt.checkpw(userrequest.password.encode('utf8'), userrecord['password']):
-                user = User(userrequest.name)
+                user = TimeSinceUser(userrequest.name)
                 users.update_one(
                     {'_id': userrecord['_id']},
                     {'$set': {
@@ -95,16 +65,16 @@ class Gateway:
                 return user
         return None
 
-    def get_user_session(self, access_token) -> Optional[User]:
+    def get_user_session(self, access_token) -> Optional[TimeSinceUser]:
         users = self._mongo.db.users
         filt = {'accessToken': access_token}
         if users.count(filt) == 1:
             userrecord = users.find_one(filt)
             if userrecord:
-                return User(userrecord['name'], access_token=access_token)
+                return TimeSinceUser(userrecord['name'], access_token=access_token)
         return None
 
-    def remove_user_session(self, user: User) -> None:
+    def remove_user_session(self, user: TimeSinceUser) -> None:
         users = self._mongo.db.users
         userid = self.get_userid(user)
         users.update_one(
@@ -112,7 +82,7 @@ class Gateway:
             {'$set': {'accessToken': None}},
         )
 
-    def register_user(self, userrequest: RequestUser) -> Optional[User]:
+    def register_user(self, userrequest: RequestUser) -> Optional[TimeSinceUser]:
         if userrequest.name == userrequest.password:
             return None
 
@@ -120,7 +90,7 @@ class Gateway:
         if users.find_one({'name': userrequest.name}):
             return None
         hashpass = bcrypt.hashpw(userrequest.password.encode('utf8'), bcrypt.gensalt())
-        user = User(userrequest.name)
+        user = TimeSinceUser(userrequest.name)
         users.insert({
             'name': userrequest.name,
             'password': hashpass,
@@ -136,7 +106,7 @@ class Gateway:
             return True
         return False
 
-    def get_userid(self, user: User) -> ObjectId:
+    def get_userid(self, user: TimeSinceUser) -> ObjectId:
         users = self._mongo.db.users
         record = users.find_one({'accessToken': user.get_id()})
         return record['_id']
@@ -166,27 +136,27 @@ class Gateway:
         )
         return Since('Our communit grew', dates)
 
-    def get_user_timers(self, user: User) -> Iterable[Timer]:
+    def get_user_timers(self, user: TimeSinceUser) -> Iterable[Since]:
         timers = self._mongo.db.timers
         userid = self.get_userid(user)
         for timerrecord in timers.find({'userid': userid}):
-            yield Timer.from_record(timerrecord)
+            yield Since.from_record(timerrecord)
 
-    def get_public_timer(self, publishedid: str) -> Optional[Timer]:
+    def get_public_timer(self, publishedid: str) -> Optional[Since]:
         timers = self._mongo.db.timers
         if not publishedid:
             return None
         record = timers.find_one({'publishedid': publishedid})
         if record:
-            return Timer.from_record(record)
+            return Since.from_record(record)
         return None
 
-    def get_listed_public_timers(self) -> Iterable[Timer]:
+    def get_listed_public_timers(self) -> Iterable[Since]:
         timers = self._mongo.db.timers
         for record in timers.find({'publishedid': {'$gt': ''}, 'listed': True}):
-            yield Timer.from_record(record)
+            yield Since.from_record(record)
 
-    def create_timer(self, user: User, title: str, ithappendnow: bool) -> Timer:
+    def create_timer(self, user: TimeSinceUser, title: str, ithappendnow: bool) -> Since:
         timers = self._mongo.db.timers
         userid = self.get_userid(user)
         record = {
@@ -197,9 +167,9 @@ class Gateway:
             'listed': False,
         }
         result = timers.insert_one(record)
-        return Timer.from_record(dict(record, **{'_id': result.inserted_id}))
+        return Since.from_record(dict(record, **{'_id': result.inserted_id}))
 
-    def record_event(self, user: User, timerid: str) -> Timer:
+    def record_event(self, user: TimeSinceUser, timerid: str) -> Since:
         timers = self._mongo.db.timers
         oid = ObjectId(timerid)
         userid = self.user_id(user)
@@ -208,4 +178,4 @@ class Gateway:
             {'$push': {'events': dt.datetime.utcnow()}},
         )
         record = timers.find_one({'_id': oid})
-        return Timer.from_record(record)
+        return Since.from_record(record)
