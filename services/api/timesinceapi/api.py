@@ -123,19 +123,22 @@ def register_api(app: Flask, gateway: Gateway) -> None:
         )
         return jsonify({'message': 'Timer created'}), HTTPStatus.OK
 
-    @app.route('/timers/{timerid}/observe', methods=['PUT'])
+    @app.route('/timers/<timerid>', methods=['PUT'])
+    @login_required
     def record_event(timerid):
         user = current_user
-        return gateway.record_event(user, timerid)
+        return jsonify(
+            gateway.record_event(user, timerid).todict(),
+        ), HTTPStatus.OK
 
-    @app.route('/publictimers/{publishedid}', methods=['GET'])
+    @app.route('/publictimers/<publishedid>', methods=['GET'])
     def get_public_timer(publishedid):
         since = gateway.get_public_timer(publishedid)
         if not since:
             return jsonify({}), HTTPStatus.NOTFOUND
         return jsonify(since.todict()), HTTPStatus.OK
 
-    @app.route('/publictimers}', methods=['GET'])
+    @app.route('/publictimers', methods=['GET'])
     def get_public_timers():
         user = current_user
         return jsonify({

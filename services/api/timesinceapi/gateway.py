@@ -11,13 +11,20 @@ from .timeutil import Since
 
 
 class TimeSinceUser(UserMixin):
-    def __init__(self, name, access_token=None):
+    def __init__(self, name, access_token=None, *, uid=None):
         super().__init__()
         self._access_token = (
             access_token if access_token is not None
             else str(uuid4().int + hash(name))
         )
         self._name = name
+        self._uid = uid
+
+    @property
+    def uid(self) -> ObjectId:
+        if isinstance(self._uid, str):
+            return ObjectId(self._uid)
+        return self._uid
 
     @property
     def name(self):
@@ -35,6 +42,9 @@ class TimeSinceUser(UserMixin):
     @property
     def is_anonymous(self):
         return False
+
+    def set_uid(self, value):
+        self._uid = value
 
     def get_id(self):
         return self._access_token
@@ -54,7 +64,7 @@ class Gateway:
         userrecord = users.find_one({'name': userrequest.name})
         if userrecord:
             if bcrypt.checkpw(userrequest.password.encode('utf8'), userrecord['password']):
-                user = TimeSinceUser(userrequest.name)
+                user = TimeSinceUser(userrequest.name, uid=userrecord['_id'])
                 users.update_one(
                     {'_id': userrecord['_id']},
                     {'$set': {
@@ -71,7 +81,10 @@ class Gateway:
         if users.count(filt) == 1:
             userrecord = users.find_one(filt)
             if userrecord:
-                return TimeSinceUser(userrecord['name'], access_token=access_token)
+                return TimeSinceUser(
+                    userrecord['name'], access_token=access_token,
+                    uid=userrecord['_id'],
+                )
         return None
 
     def remove_user_session(self, user: TimeSinceUser) -> None:
@@ -91,13 +104,14 @@ class Gateway:
             return None
         hashpass = bcrypt.hashpw(userrequest.password.encode('utf8'), bcrypt.gensalt())
         user = TimeSinceUser(userrequest.name)
-        users.insert({
+        result = users.insert({
             'name': userrequest.name,
             'password': hashpass,
             'email': userrequest.email,
             'registrationDate': dt.datetime.utcnow(),
             'accessToken': user.get_id(),
         })
+        user.set_uid(result.inserted_id)
         return user
 
     def exists_user(self, username: str) -> bool:
@@ -172,7 +186,7 @@ class Gateway:
     def record_event(self, user: TimeSinceUser, timerid: str) -> Since:
         timers = self._mongo.db.timers
         oid = ObjectId(timerid)
-        userid = self.user_id(user)
+        userid = user.uid
         timers.update_one(
             {'_id': oid, 'userid': userid},
             {'$push': {'events': dt.datetime.utcnow()}},
