@@ -5,7 +5,7 @@ services:
   gateway:
     build: services/gateway
     ports:
-      - "127.0.0.1:5011:80"
+      - "5011:80"
     links:
       - ui
       - api
