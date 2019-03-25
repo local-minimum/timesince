@@ -1,6 +1,7 @@
 {
-  "name": "ui",
+  "name": "timesince",
   "version": "0.1.0",
+  "homepage" : "/timesince",
   "private": true,
   "dependencies": {
     "jquery": "^3.3.1",

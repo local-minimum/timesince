@@ -1,21 +1,22 @@
 import $ from 'jquery';
+const URLROOT = '/timesince';
 
 function getUser() {
-  return $.getJSON('/api/user');
+  return $.getJSON(`${URLROOT}/api/user`);
 }
 
 function getVisitationTimer() {
-  return $.getJSON('/api');
+  return $.getJSON(`${URLROOT}/api`);
 }
 
 function getMyFeed() {
-  return $.getJSON('/api/timers');
+  return $.getJSON(`${URLROOT}/api/timers`);
 }
 
 function login(user, password) {
   return $.ajax({
     type: "POST",
-    url: "/api/login",
+    url: `${URLROOT}/api/login`,
     data: JSON.stringify({ user, password}),
     contentType: "application/json; charset=utf-8",
     dataType: "json",
@@ -29,7 +30,7 @@ function login(user, password) {
 function logout() {
   return $.ajax({
     type: "POST",
-    url: "/api/logout",
+    url: `${URLROOT}/api/logout`,
     data: JSON.stringify({}),
     contentType: "application/json; charset=utf-8",
     dataType: "json",
@@ -42,7 +43,7 @@ function logout() {
 function registerUser(user, password, email) {
   return $.ajax({
     type: "PUT",
-    url: "/api/users",
+    url: `${URLROOT}/api/users`,
     data: JSON.stringify({ user, password, email }),
     contentType: "application/json; charset=utf-8",
     dataType: "json",
@@ -55,7 +56,7 @@ function registerUser(user, password, email) {
 function createTimer(title) {
   return $.ajax({
     type: "PUT",
-    url: "/api/timers",
+    url: `${URLROOT}/api/timers`,
     data: JSON.stringify({ title }),
     contentType: "application/json; charset=utf-8",
     dataType: "json",
@@ -68,7 +69,7 @@ function createTimer(title) {
 function addTimerEvent(timerId) {
   return $.ajax({
     type: "PUT",
-    url: `/api/timers/${timerId}`,
+    url: `${URLROOT}/api/timers/${timerId}`,
     data: JSON.stringify({}),
     contentType: "application/json; charset=utf-8",
     dataType: "json",

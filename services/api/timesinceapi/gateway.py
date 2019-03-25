@@ -104,14 +104,14 @@ class Gateway:
             return None
         hashpass = bcrypt.hashpw(userrequest.password.encode('utf8'), bcrypt.gensalt())
         user = TimeSinceUser(userrequest.name)
-        result = users.insert({
+        inserted_id = users.insert({
             'name': userrequest.name,
             'password': hashpass,
             'email': userrequest.email,
             'registrationDate': dt.datetime.utcnow(),
             'accessToken': user.get_id(),
         })
-        user.set_uid(result.inserted_id)
+        user.set_uid(inserted_id)
         return user
 
     def exists_user(self, username: str) -> bool:
