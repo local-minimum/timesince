@@ -1,7 +1,7 @@
 import api from '../api';
 import {
   setUser, clearUser, setError, setFeed, setOverlayError, clearRegisterForm,
-  clearLoginForm,
+  clearLoginForm, clearOverlayError,
 } from './actions';
 
 export function retrieveUserState() {
@@ -32,12 +32,25 @@ export function retrieveUserState() {
 
 export function registerUser(name, password, email) {
   return function(dispatch) {
+    dispatch(clearOverlayError());
     return api.registerUser(name, password, email).then(
       response => {
         dispatch(clearRegisterForm());
         api.login(name, password)
           .then(
-            user => dispatch(setUser(user)),
+            user => {
+              dispatch(setUser(user))
+              dispatch(setFeed([]));
+              api.getMyFeed().then(
+                response => dispatch(setFeed(response.feed)),
+                err => {
+                  dispatch(setFeed([]));
+                  dispatch(setError(
+                    err.message ? err.message : 'Unable to retrieve feed'
+                  ));
+                },
+              );
+            },
             err => dispatch(setError(err.message)),
           );
       },
@@ -52,6 +65,7 @@ export function registerUser(name, password, email) {
 
 export function loginUser(name, password) {
   return function(dispatch) {
+    dispatch(clearOverlayError());
     return api.login(name, password).then(
       user => {
         dispatch(clearLoginForm());

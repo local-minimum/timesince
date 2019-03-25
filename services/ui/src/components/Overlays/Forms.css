@@ -30,6 +30,8 @@
   padding-top: 0.5em;
 }
 
-.Form > .action-buttons > *{
+.Form > .action-buttons > * {
   float: right;
+  border-color: #ffb6c1;
+  color: #ffb6c1;
 }

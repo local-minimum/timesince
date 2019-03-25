@@ -54,6 +54,10 @@ export function setOverlayError(message) {
   return { type: SET_OVERLAY_ERROR, message };
 }
 
+export function clearOverlayError() {
+  return { type: SET_OVERLAY_ERROR, message: null };
+}
+
 // REGISTER FORM
 
 export function showRegister() {
