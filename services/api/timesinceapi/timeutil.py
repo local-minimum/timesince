@@ -67,7 +67,7 @@ class Since:
             'value': self.value,
             'unit': self.unit,
             'published': self._publishedid,
-            'id': str(self._timerid),
+            'id': str(self._timerid) if self._timerid else None,
         }
 
     @classmethod
