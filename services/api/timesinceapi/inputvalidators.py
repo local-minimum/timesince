@@ -5,16 +5,30 @@ import re
 class ValidationError(Exception):
     pass
 
+def validname(name) -> bool:
+    if len(name) < 1:
+        raise ValidationError("Username too short")
 
 def validpassword(pwd) -> bool:
     complexity = set(c for c in pwd)
-    return len(pwd) > 8 and len(complexity) > 4
+    if len(pwd) <= 8:
+        raise ValidationError("Password too short")
+    if len(complexity) < 4:
+        raise ValidationError("Password too simple")
 
 
 def validemail(email) -> bool:
     if not email:
-        return True
-    return re.match(r'^[^@ /,]+@[^@ /,.]+\.[^@ /]+$', email) is not None
+        return
+    if not re.match(r'^[^@ /,]+@[^@ /,.]+\.[^@ /]+$', email):
+        raise ValidationError("Invalid email")
+
+
+def username_and_password_similar(user: "RequestUser") -> bool:
+    return (
+        user.name in user.password
+        and len(user.name) / len(user.password) > 0.5
+    )
 
 
 @attr.s(frozen=True)
@@ -22,7 +36,7 @@ class RequestUser:
     name = attr.ib(
         metadata={
             'json_name': 'user',
-            'validator': lambda name: len(name),
+            'validator': validname,
         },
     )
     password = attr.ib(
@@ -49,12 +63,12 @@ class RequestUser:
             validator = attribute.metadata.get('validator')
             if json_name and json_name in requestdata:
                 value = requestdata[json_name]
-                if validate and validator and not validator(value):
-                    raise ValidationError()
+                if validate and validator:
+                    validator(value)
 
                 params[attribute.name] = value
 
         try:
             return cls(**params)
         except (AttributeError, TypeError):
-            raise ValidationError()
+            raise ValidationError('Missing required user data')

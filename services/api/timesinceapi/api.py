@@ -7,7 +7,9 @@ from flask_login import (
 )
 
 from .timeutil import Since
-from .inputvalidators import RequestUser, ValidationError
+from .inputvalidators import (
+    RequestUser, ValidationError, username_and_password_similar,
+)
 from .gateway import Gateway, TimeSinceUser
 
 
@@ -72,14 +74,20 @@ def register_api(app: Flask, gateway: Gateway) -> None:
     def register_user():
         try:
             userrequest = RequestUser.from_request_data(request.get_json())
-        except ValidationError:
+        except ValidationError as e:
             app.logger.info("Failed to validate user on request {}".format(
                 request.get_json(),
             ))
             return (
-                jsonify({'message': 'Bad password or username'}),
+                jsonify({'message': str(e)}),
                 HTTPStatus.UNAUTHORIZED,
             )
+        if username_and_password_similar(userrequest):
+            return (
+                jsonify({'message': 'Name and password too similar'}),
+                HTTPStatus.UNAUTHORIZED,
+            )
+
         if not gateway.register_user(userrequest):
             if gateway.exists_user(userrequest.name):
                 return (
