@@ -3,6 +3,30 @@ import './Forms.css'
 import BasicButton from '../BasicButton';
 
 export default class RegisterForm extends Component {
+  constructor(props) {
+      super(props);
+      this.keyActions = this.keyActions.bind(this);
+  }
+
+  keyActions (evt) {
+    if (evt.keyCode === 13) {
+      const { onRegister } = this.props;
+      onRegister();
+    }
+    else if (evt.keyCode === 27) {
+      const { onHide } = this.props;
+      onHide();
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.keyActions, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.keyActions, false);
+  }
+
   render() {
     const {
       onUpdateRegisterName, onUpdateRegisterPwd, onUpdateRegesterEmail,
@@ -11,7 +35,7 @@ export default class RegisterForm extends Component {
     } = this.props;
     const repeatMatch = password === repeatPassword;
     const shortName = user.length < 1;
-    const shortPwd = password.length < 8;
+    const shortPwd = password.length <= 8;
     const canSubmit = repeatMatch && !shortName && !shortPwd;
     const submit = canSubmit ? onRegister: () => {};
     let Error;
