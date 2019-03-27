@@ -60,3 +60,8 @@
 .Card > .-createButton > div {
   margin-top: -.05em;
 }
+
+.Card > .-main {
+  display: relative;
+  margin: auto;
+}

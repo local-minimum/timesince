@@ -1,0 +1,11 @@
+.TimerNav > .-option {
+  display: inline-block;
+  margin-right: 0.5em;
+  cursor: pointer;
+  height: 1.5em;
+}
+
+.TimerNav > .-selected {
+  opacity: 0.4;
+  cursor: default !important;
+}
