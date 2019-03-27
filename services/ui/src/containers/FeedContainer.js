@@ -15,7 +15,7 @@ const mapDispatchToProps = dispatch => {
 const mapStateToProps = state => {
   return {
     feed: getFeed(state),
-    showAddTimer: isLoggedIn(state),
+    showAddTimer: isLoggedIn(state),    
   };
 }
 

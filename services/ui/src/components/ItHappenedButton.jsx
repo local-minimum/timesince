@@ -15,11 +15,16 @@ export default class ItHappenedButton extends Component {
   }
 
   onMouseDown(evt) {
-    let { submitProgress} = this.state;
+    let { submitProgress } = this.state;
+    const { id } = this.props;
     if (submitProgress == null) {
       submitProgress = 50;
-      this.setState({ submitProgress, progressTxt: '3', progressIter: 1 });
-      setTimeout(this.onCountProgress, SUMBIT_STEP);
+      if (id != null) {
+        this.setState({ submitProgress, progressTxt: '3', progressIter: 1 });
+        setTimeout(this.onCountProgress, SUMBIT_STEP);
+      } else {
+        this.setState({ submitProgress, progressTxt: 'Not allowed', progressIter: 1});
+      }
     }
     evt.preventDefault();
   }
@@ -51,9 +56,12 @@ export default class ItHappenedButton extends Component {
 
   onMouseUp() {
     const { progressIter } = this.state;
-    if (progressIter !== null) {
+    const { id } = this.props;
+    if (progressIter != null && id != null) {
       this.setState({ submitProgress: null, progressTxt: 'Forget that' });
       setTimeout(this.clearForget, 1000);
+    } else if (progressIter != null) {
+      this.setState({ submitProgress: null, progressTxt: null });
     } else {
       this.setState({ submitProgress: null });
     }
@@ -68,17 +76,16 @@ export default class ItHappenedButton extends Component {
 
   render() {
     const { submitProgress, progressTxt } = this.state;
-    const { value, unit, id } = this.props;
+    const { value, unit }  = this.props;
     const ButtonTxt = progressTxt != null ? progressTxt : (value == null ? 'Never happened' : `${value} ${unit} ago`);
     const extraStyle = submitProgress == null ? null : { boxShadow: `0px 0px ${submitProgress}px red`};
-    const canSubmit = id != null;
 
     return (
       <div
           className="ItHappenedButton"
           style={extraStyle}
-          onMouseUp={canSubmit ? this.onMouseUp : null}
-          onMouseDown={canSubmit ? this.onMouseDown : null}
+          onMouseUp={this.onMouseUp}
+          onMouseDown={this.onMouseDown}
         >
         <div className="-center">{ButtonTxt}</div>
       </div>
